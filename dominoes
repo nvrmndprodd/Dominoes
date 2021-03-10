@@ -1,12 +1,12 @@
 import random
 
-stack = [[0, 0], [1, 0], [2, 0], [3, 0], [4, 0],
+stock = [[0, 0], [1, 0], [2, 0], [3, 0], [4, 0],
          [5, 0], [6, 0], [1, 1], [2, 1], [3, 1],
          [4, 1], [5, 1], [6, 1], [2, 2], [3, 2],
          [4, 2], [5, 2], [6, 2], [3, 3], [4, 3],
          [5, 3], [6, 3], [4, 4], [5, 4], [6, 4],
          [5, 5], [6, 5], [6, 6]]
-extraStack = list(stack)
+extraStock = list(stock)
 
 snake = -1
 flag = True
@@ -16,17 +16,17 @@ snakeNumbersCount = [0] * 7
 
 # раздача фишек
 while flag:
-    computerPieces = random.sample(stack, 7)  # фишки компа
+    computerPieces = random.sample(stock, 7)  # фишки компа
     for piece in computerPieces:
-        stack.remove(piece)  # удаляем его фишки из стека
+        stock.remove(piece)  # удаляем его фишки из стека
         if piece[0] == piece[1] and piece[1] > snake:  # смотрим, есть ли у компа парная фишка
             snake = piece[0]
             snakePiece[0] = piece
             move = 'player'
 
-    playerPieces = random.sample(stack, 7)  # фишки игрока
+    playerPieces = random.sample(stock, 7)  # фишки игрока
     for piece in playerPieces:
-        stack.remove(piece)  # удаляем его фишки
+        stock.remove(piece)  # удаляем его фишки
         if piece[0] == piece[1] and piece[1] > snake:
             snake = piece[0]
             snakePiece[0] = piece
@@ -35,7 +35,7 @@ while flag:
     if snake > -1:
         flag = False
     else:
-        stack = list(extraStack)
+        stock = list(extraStock)
 
 if move == 'computer':
     playerPieces.remove(snakePiece[0])
@@ -50,8 +50,8 @@ snakeNumbersCount[snakePiece[0][1]] += 1
 flag = True
 while flag:
 
-    print("{}".format('=' * 70))
-    print("Stock size: {}".format(len(stack)))
+    print('{}'.format('=' * 70))
+    print("Stock size: {}".format(len(stock)))
     print("Computer pieces: {}".format(len(computerPieces)))
 
     print("")
@@ -73,7 +73,6 @@ while flag:
 
         if (status != "It's your turn to make a move. Enter your command."
                 and status != "Computer is about to make a move. Press Enter to continue..."):
-            flag = False
             break
 
         playerCommand = ''
@@ -83,26 +82,28 @@ while flag:
         while wrongCommand:
             playerCommand = input()
 
-            if playerCommand not in [str(i) for i in range(-len(playerPieces) + 1, len(playerPieces))]:
-                print("Invalid input. Please enter a number.")
+            if playerCommand not in [str(i) for i in range(-len(playerPieces), len(playerPieces) + 1)]:
+                print("Invalid input. Please try again.")
 
-            elif (int(playerCommand) < 0 and snakePiece[0][0] != playerPieces[abs(int(playerCommand)) - 1][0]
-                  and snakePiece[0][0] != playerPieces[abs(int(playerCommand)) - 1][1]):
+            elif int(playerCommand) < 0 and snakePiece[0][0] not in playerPieces[abs(int(playerCommand)) - 1]:
                 print("Illegal move. Please try again.")
 
-            elif (int(playerCommand) > 0 and snakePiece[-1][1] != playerPieces[abs(int(playerCommand)) - 1][0]
-                  and snakePiece[-1][1] != playerPieces[abs(int(playerCommand)) - 1][1]):
+            elif int(playerCommand) > 0 and snakePiece[-1][1] not in playerPieces[abs(int(playerCommand)) - 1]:
                 print("Illegal move. Please try again.")
-            elif int(playerCommand) == 0 and len(stack) == 0:
-                print("Illegal move. Please try again.")
+            elif int(playerCommand) == 0 and len(stock) == 0:
+                move = 'computer'
+                status = "Computer is about to make a move. Press Enter to continue..."
+                wrongCommand = False
             else:
                 pieceNumber = int(playerCommand)
                 wrongCommand = False
 
+        if move == 'computer': continue
+
         if pieceNumber == 0:
-            newPiece = random.choice(stack)
+            newPiece = random.choice(stock)
             playerPieces.append(newPiece)
-            stack.remove(newPiece)
+            stock.remove(newPiece)
             move = 'computer'
             status = "Computer is about to make a move. Press Enter to continue..."
             continue
@@ -141,6 +142,7 @@ while flag:
 
         empty = input()
         isWrong = True
+        pieceNumber = 0
         while isWrong:
             pieceNumber = random.randint(-(len(computerPieces)), len(computerPieces))
             if (pieceNumber > 0 and (snakePiece[-1][1] == computerPieces[abs(pieceNumber) - 1][0]
@@ -151,6 +153,11 @@ while flag:
                 isWrong = False
             elif pieceNumber == 0:
                 isWrong = False
+
+        if pieceNumber == 0 and len(stock) == 0:
+            move = 'player'
+            status = "It's your turn to make a move. Enter your command."
+            continue
 
         pieceToPlace = computerPieces[abs(pieceNumber) - 1]
 
@@ -175,9 +182,9 @@ while flag:
             snakeNumbersCount[pieceToPlace[0]] += 1
 
         else:
-            newPiece = random.choice(stack)
+            newPiece = random.choice(stock)
             computerPieces.append(newPiece)
-            stack.remove(newPiece)
+            stock.remove(newPiece)
 
         move = 'player'
         status = "It's your turn to make a move. Enter your command."
@@ -189,6 +196,6 @@ while flag:
         status = 'The game is over. The computer won!'
 
     else:
-        for key in snakeNumbersCount:
-            if snakeNumbersCount[key] == 8:
+        for i in range(len(snakeNumbersCount)):
+            if snakeNumbersCount[i] == 8:
                 status = "The game is over. It's a draw!"
